@@ -1,0 +1,31 @@
+[newrelic]
+api_key = "NRAK-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+account_id = "1234567"
+
+[analyzer]
+# 选择分析引擎: "claude" | "openai"
+provider = "claude"
+
+[claude]
+api_key = "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+model = "claude-opus-4-6"
+
+[openai]
+api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+model = "gpt-4o"
+
+[output]
+# 输出格式: "terminal" | "markdown" | "both"
+format = "both"
+output_dir = "./reports"
+# 报告语言: "zh"（中文，默认）| "en"（English）
+language = "zh"
+
+# 监控的服务器列表（留空则查询所有）
+[[servers]]
+name = "web-01"
+hostname = "web-01.example.com"
+
+[[servers]]
+name = "worker-01"
+hostname = "worker-01.example.com"
