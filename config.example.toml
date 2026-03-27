@@ -3,8 +3,11 @@ api_key = "NRAK-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 account_id = "1234567"
 
 [analyzer]
-# 选择分析引擎: "claude" | "openai"
-provider = "claude"
+# 选择分析引擎:
+#   "claude" — Claude API（需要 api_key）
+#   "openai" — OpenAI API（需要 api_key）
+#   "local"  — 本地分析，无需 API Key（敏感数据检测、接口统计等）
+provider = "local"
 
 [claude]
 api_key = "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

@@ -1,5 +1,6 @@
 use crate::domain::entities::{ErrorEvent, LogLevel};
 use crate::domain::ports::AnalysisInput;
+use crate::infrastructure::shared::redaction::redact_for_display;
 
 /// 根据语言配置构建分析 prompt。
 /// language: "zh"（默认）或 "en"
@@ -19,8 +20,22 @@ pub fn build_prompt(input: &AnalysisInput, language: &str) -> String {
         .join("\n");
 
     match language {
-        "en" => build_en(input, total, warn_count, error_count, fatal_count, &event_lines),
-        _ => build_zh(input, total, warn_count, error_count, fatal_count, &event_lines),
+        "en" => build_en(
+            input,
+            total,
+            warn_count,
+            error_count,
+            fatal_count,
+            &event_lines,
+        ),
+        _ => build_zh(
+            input,
+            total,
+            warn_count,
+            error_count,
+            fatal_count,
+            &event_lines,
+        ),
     }
 }
 
@@ -32,8 +47,13 @@ fn build_zh(
     fatal: usize,
     events: &str,
 ) -> String {
-    let log_summary = format!("共 {total} 条日志 — Warning: {warn}, Error: {error}, Fatal: {fatal}");
-    let events_section = if events.is_empty() { "无异常事件".to_string() } else { events.to_string() };
+    let log_summary =
+        format!("共 {total} 条日志 — Warning: {warn}, Error: {error}, Fatal: {fatal}");
+    let events_section = if events.is_empty() {
+        "无异常事件".to_string()
+    } else {
+        events.to_string()
+    };
 
     format!(
         r#"你是一位资深 DevOps 工程师。请分析以下服务器日志数据，给出问题列表和优化建议。
@@ -84,8 +104,13 @@ fn build_en(
     fatal: usize,
     events: &str,
 ) -> String {
-    let log_summary = format!("Total {total} log entries — Warning: {warn}, Error: {error}, Fatal: {fatal}");
-    let events_section = if events.is_empty() { "No significant events".to_string() } else { events.to_string() };
+    let log_summary =
+        format!("Total {total} log entries — Warning: {warn}, Error: {error}, Fatal: {fatal}");
+    let events_section = if events.is_empty() {
+        "No significant events".to_string()
+    } else {
+        events.to_string()
+    };
 
     format!(
         r#"You are a senior DevOps engineer. Analyze the following server log data and provide a list of issues and optimization suggestions.
@@ -129,12 +154,19 @@ Return only JSON, no other text."#,
 }
 
 fn event_line(e: &ErrorEvent) -> String {
-    let freq = if e.count >= 100 { "high-freq" } else if e.count >= 10 { "mid-freq" } else { "low-freq" };
+    let freq = if e.count >= 100 {
+        "high-freq"
+    } else if e.count >= 10 {
+        "mid-freq"
+    } else {
+        "low-freq"
+    };
+    let message = redact_for_display(&e.message, 200);
     format!(
         "- [{}x][{}] {} | host: {} | first: {} last: {}",
         e.count,
         freq,
-        e.message,
+        message,
         e.hostname,
         e.first_seen.format("%m-%d %H:%M"),
         e.last_seen.format("%m-%d %H:%M"),

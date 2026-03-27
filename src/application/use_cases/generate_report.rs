@@ -87,11 +87,7 @@ pub fn weekly_range(hostnames: Vec<String>) -> QueryRange {
             .and_hms_opt(0, 0, 0)
             .unwrap()
             .and_utc(),
-        to: now
-            .date_naive()
-            .and_hms_opt(23, 59, 59)
-            .unwrap()
-            .and_utc(),
+        to: now.date_naive().and_hms_opt(23, 59, 59).unwrap().and_utc(),
         hostnames,
     }
 }

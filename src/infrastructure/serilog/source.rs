@@ -20,9 +20,9 @@ impl SerilogFileSource {
     async fn read_all_entries(&self) -> anyhow::Result<Vec<LogEntry>> {
         let mut entries = Vec::new();
 
-        let metadata = fs::metadata(&self.dir).await.map_err(|e| {
-            anyhow::anyhow!("无法访问路径 '{}': {e}", self.dir.display())
-        })?;
+        let metadata = fs::metadata(&self.dir)
+            .await
+            .map_err(|e| anyhow::anyhow!("无法访问路径 '{}': {e}", self.dir.display()))?;
 
         if metadata.is_file() {
             // 单文件模式
@@ -32,9 +32,9 @@ impl SerilogFileSource {
             }
         } else {
             // 文件夹模式
-            let mut dir = fs::read_dir(&self.dir).await.map_err(|e| {
-                anyhow::anyhow!("无法读取目录 '{}': {e}", self.dir.display())
-            })?;
+            let mut dir = fs::read_dir(&self.dir)
+                .await
+                .map_err(|e| anyhow::anyhow!("无法读取目录 '{}': {e}", self.dir.display()))?;
             while let Some(entry) = dir.next_entry().await? {
                 let path = entry.path();
                 if is_log_file(&path) {
@@ -131,7 +131,13 @@ fn parse_json_line(line: &str, fallback_hostname: &str) -> anyhow::Result<LogEnt
         .or_else(|| v["Properties"]["SourceContext"].as_str())
         .map(|s| s.to_string());
 
-    Ok(LogEntry { timestamp, level, message, hostname, service })
+    Ok(LogEntry {
+        timestamp,
+        level,
+        message,
+        hostname,
+        service,
+    })
 }
 
 // ── Pipe 格式 ─────────────────────────────────────────────────────────────────
@@ -267,7 +273,10 @@ impl DataSource for SerilogFileSource {
 
         let mut groups: HashMap<(String, String), Vec<LogEntry>> = HashMap::new();
         for entry in logs {
-            if matches!(entry.level, LogLevel::Warn | LogLevel::Error | LogLevel::Fatal) {
+            if matches!(
+                entry.level,
+                LogLevel::Warn | LogLevel::Error | LogLevel::Fatal
+            ) {
                 groups
                     .entry((entry.message.clone(), entry.hostname.clone()))
                     .or_default()

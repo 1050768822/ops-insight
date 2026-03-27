@@ -22,10 +22,7 @@ impl NewRelicSource {
         }
     }
 
-    async fn run_nrql<T: for<'de> Deserialize<'de>>(
-        &self,
-        nrql: &str,
-    ) -> anyhow::Result<Vec<T>> {
+    async fn run_nrql<T: for<'de> Deserialize<'de>>(&self, nrql: &str) -> anyhow::Result<Vec<T>> {
         let query = format!(
             r#"{{ "query": "{{ actor {{ account(id: {account_id}) {{ nrql(query: \"{nrql}\") {{ results }} }} }} }}" }}"#,
             account_id = self.account_id,
@@ -112,8 +109,7 @@ impl DataSource for NewRelicSource {
         let entries = raw
             .into_iter()
             .map(|r| LogEntry {
-                timestamp: DateTime::from_timestamp_millis(r.timestamp)
-                    .unwrap_or_else(Utc::now),
+                timestamp: DateTime::from_timestamp_millis(r.timestamp).unwrap_or_else(Utc::now),
                 level: parse_level(r.level.as_deref()),
                 message: r.message.unwrap_or_default(),
                 hostname: r.hostname.unwrap_or_default(),
@@ -142,16 +138,13 @@ impl DataSource for NewRelicSource {
         let events = raw
             .into_iter()
             .map(|r| ErrorEvent {
-                timestamp: DateTime::from_timestamp_millis(r.last_seen)
-                    .unwrap_or_else(Utc::now),
+                timestamp: DateTime::from_timestamp_millis(r.last_seen).unwrap_or_else(Utc::now),
                 message: r.message.unwrap_or_default(),
                 hostname: r.hostname.unwrap_or_default(),
                 service: r.service,
                 count: r.count,
-                first_seen: DateTime::from_timestamp_millis(r.first_seen)
-                    .unwrap_or_else(Utc::now),
-                last_seen: DateTime::from_timestamp_millis(r.last_seen)
-                    .unwrap_or_else(Utc::now),
+                first_seen: DateTime::from_timestamp_millis(r.first_seen).unwrap_or_else(Utc::now),
+                last_seen: DateTime::from_timestamp_millis(r.last_seen).unwrap_or_else(Utc::now),
             })
             .collect();
 

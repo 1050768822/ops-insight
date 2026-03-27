@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::domain::entities::{Issue, Priority, Severity, Suggestion};
 use crate::domain::ports::{AnalysisInput, AnalysisOutput, Analyzer};
 use crate::domain::value_objects::SecretKey;
+use crate::infrastructure::shared::redaction::redact_for_display;
 
 pub struct OpenAiAnalyzer {
     api_key: SecretKey,
@@ -21,9 +22,7 @@ impl OpenAiAnalyzer {
             client: reqwest::Client::new(),
         }
     }
-
 }
-
 
 #[derive(Serialize)]
 struct OpenAiRequest {
@@ -104,13 +103,14 @@ impl Analyzer for OpenAiAnalyzer {
 
         let status = http_resp.status();
         let body = http_resp.text().await?;
+        let safe_body = redact_for_display(&body, 300);
 
         if !status.is_success() {
-            anyhow::bail!("OpenAI API 错误 {status}: {body}");
+            anyhow::bail!("OpenAI API 错误 {status}，响应摘要: {safe_body}");
         }
 
         let resp: OpenAiResponse = serde_json::from_str(&body)
-            .map_err(|e| anyhow::anyhow!("OpenAI 响应解析失败: {e}\n原始内容: {body}"))?;
+            .map_err(|e| anyhow::anyhow!("OpenAI 响应解析失败: {e}；响应摘要: {safe_body}"))?;
 
         let text = resp
             .choices
@@ -119,8 +119,10 @@ impl Analyzer for OpenAiAnalyzer {
             .map(|c| c.message.content)
             .unwrap_or_default();
 
-        let raw: RawAnalysis = serde_json::from_str(&text)
-            .map_err(|e| anyhow::anyhow!("OpenAI 返回格式解析失败: {e}\n原始内容: {text}"))?;
+        let raw: RawAnalysis = serde_json::from_str(&text).map_err(|e| {
+            let safe_text = redact_for_display(&text, 300);
+            anyhow::anyhow!("OpenAI 返回格式解析失败: {e}；内容摘要: {safe_text}")
+        })?;
 
         let issues = raw
             .issues

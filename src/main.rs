@@ -11,10 +11,11 @@ use clap::Parser;
 use serde::Deserialize;
 
 use application::dtos::QueryRange;
-use application::use_cases::generate_report::{daily_range, weekly_range, GenerateReportUseCase};
+use application::use_cases::generate_report::{GenerateReportUseCase, daily_range, weekly_range};
 use domain::ports::Analyzer;
 use domain::value_objects::SecretKey;
 use infrastructure::claude::ClaudeAnalyzer;
+use infrastructure::local::LocalAnalyzer;
 use infrastructure::newrelic::NewRelicSource;
 use infrastructure::openai::OpenAiAnalyzer;
 use infrastructure::output::{MarkdownWriter, TerminalWriter};
@@ -142,9 +143,7 @@ async fn main() -> anyhow::Result<()> {
         }
         _ => {
             if config.servers.is_empty() {
-                anyhow::bail!(
-                    "config.toml 中 [[servers]] 列表不能为空，请至少配置一台服务器。"
-                );
+                anyhow::bail!("config.toml 中 [[servers]] 列表不能为空，请至少配置一台服务器。");
             }
             let hostnames: Vec<String> =
                 config.servers.iter().map(|s| s.hostname.clone()).collect();
@@ -192,8 +191,9 @@ fn build_analyzer(config: &Config) -> anyhow::Result<Arc<dyn Analyzer>> {
                 language,
             )))
         }
+        "local" => Ok(Arc::new(LocalAnalyzer::with_default_rules(language))),
         other => anyhow::bail!(
-            "未知的 analyzer.provider = \"{other}\"，支持: \"claude\" | \"openai\""
+            "未知的 analyzer.provider = \"{other}\"，支持: \"claude\" | \"openai\" | \"local\""
         ),
     }
 }
@@ -211,7 +211,11 @@ fn parse_custom_range(from: &str, to: &str, hostnames: Vec<String>) -> anyhow::R
         .and_hms_opt(23, 59, 59)
         .unwrap()
         .and_utc();
-    Ok(QueryRange { from: from_dt, to: to_dt, hostnames })
+    Ok(QueryRange {
+        from: from_dt,
+        to: to_dt,
+        hostnames,
+    })
 }
 
 fn serilog_range(from: Option<&str>, to: Option<&str>) -> anyhow::Result<QueryRange> {
@@ -231,7 +235,11 @@ fn serilog_range(from: Option<&str>, to: Option<&str>) -> anyhow::Result<QueryRa
             .and_utc(),
         None => Utc::now(),
     };
-    Ok(QueryRange { from: from_dt, to: to_dt, hostnames: vec![] })
+    Ok(QueryRange {
+        from: from_dt,
+        to: to_dt,
+        hostnames: vec![],
+    })
 }
 
 // ── Config loading ────────────────────────────────────────────────────────────
@@ -267,7 +275,14 @@ fn load_config(path: &str) -> anyhow::Result<Config> {
 
 fn keychain_get(service: &str) -> Option<String> {
     let output = std::process::Command::new("security")
-        .args(["find-generic-password", "-a", &whoami(), "-s", service, "-w"])
+        .args([
+            "find-generic-password",
+            "-a",
+            &whoami(),
+            "-s",
+            service,
+            "-w",
+        ])
         .output()
         .ok()?;
     if output.status.success() {

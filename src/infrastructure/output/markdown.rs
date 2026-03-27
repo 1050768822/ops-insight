@@ -70,10 +70,7 @@ impl ReportWriter for MarkdownWriter {
     async fn write(&self, report: &ReportDto) -> anyhow::Result<()> {
         fs::create_dir_all(&self.output_dir).await?;
 
-        let filename = format!(
-            "report_{}.md",
-            chrono::Utc::now().format("%Y%m%d_%H%M%S")
-        );
+        let filename = format!("report_{}.md", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
         let path = self.output_dir.join(&filename);
 
         fs::write(&path, Self::render(report)).await?;

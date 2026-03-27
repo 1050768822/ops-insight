@@ -1,4 +1,5 @@
 pub mod claude;
+pub mod local;
 pub mod newrelic;
 pub mod openai;
 pub mod output;
