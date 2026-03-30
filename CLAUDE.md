@@ -32,9 +32,9 @@ Rust CLI 工具，读取运维日志（New Relic API 或本地 Serilog 文件）
 
 ## 新增命令流程
 
-1. `src/interfaces/cli/commands.rs` — 添加 `Command` 枚举变体
-2. `src/main.rs` — 在 `match` 中注入合适的 DataSource / Analyzer / Writers
-3. 如需新 Use Case → `src/application/use_cases/` 新建文件
+1. `ops-insight-core/src/interfaces/cli/commands.rs` — 添加 `Command` 枚举变体
+2. `ops-insight-core/src/main.rs` — 在 `match` 中注入合适的 DataSource / Analyzer / Writers
+3. 如需新 Use Case → `ops-insight-core/src/application/use_cases/` 新建文件
 
 ## 配置文件
 

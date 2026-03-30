@@ -11,9 +11,9 @@ New Relic 运维报告 CLI 工具，支持从 New Relic 拉取服务器日志与
 ```bash
 git clone https://github.com/yourname/ops-insight
 cd ops-insight
-cargo build --release
+cargo build -p ops-insight-core --release
 # 可选：安装到系统路径
-cargo install --path .
+cargo install --path ops-insight-core
 ```
 
 ### 2. 初始化配置
@@ -175,8 +175,7 @@ infrastructure (New Relic, Claude, OpenAI, Local, Output)
 
 ```
 ops-insight/
-├── Cargo.toml
-├── config.example.toml
+├── Cargo.toml                   # workspace manifest
 ├── CLAUDE.md                    # AI 编码助手规则
 ├── AGENTS.md                    # AI Agent 规则
 ├── docs/
@@ -184,38 +183,57 @@ ops-insight/
 │   ├── rust-guidelines.md
 │   ├── security.md
 │   └── log-formats.md
-└── src/
-    ├── main.rs
-    ├── domain/
-    │   ├── entities/
-    │   │   ├── log_entry.rs     # LogEntry, LogLevel, ErrorEvent
-    │   │   └── report.rs        # Report, Issue, Suggestion, Severity
-    │   ├── ports/
-    │   │   ├── data_source.rs   # trait DataSource
-    │   │   ├── analyzer.rs      # trait Analyzer, AnalysisInput/Output
-    │   │   └── report_writer.rs # trait ReportWriter
-    │   └── value_objects/
-    │       └── secret_key.rs    # SecretKey（ZeroizeOnDrop + 审计日志）
-    ├── application/
-    │   ├── dtos/                # QueryRange, ReportDto
-    │   └── use_cases/
-    │       └── generate_report.rs
-    ├── infrastructure/
-    │   ├── newrelic/            # New Relic NerdGraph API
-    │   ├── claude/              # Claude API 分析器
-    │   ├── openai/              # OpenAI API 分析器
-    │   ├── local/
-    │   │   ├── analyzer.rs      # LocalAnalyzer（规则组合器）
-    │   │   └── rules/
-    │   │       ├── rule.rs      # trait LocalRule
-    │   │       ├── sensitive.rs # 敏感数据检测
-    │   │       └── endpoint.rs  # 接口统计
-    │   ├── serilog/             # Serilog 本地日志解析
-    │   ├── output/              # TerminalWriter, MarkdownWriter
-    │   └── shared/
-    │       └── prompt.rs        # 共享 Prompt 构建（zh/en）
-    └── interfaces/
-        └── cli/                 # clap CLI 命令定义
+├── ops-insight-core/            # 共享库 + CLI 二进制
+│   ├── Cargo.toml
+│   ├── config.example.toml
+│   └── src/
+│       ├── main.rs              # CLI 入口：配置加载、依赖注入、命令分发
+│       ├── lib.rs               # 公开 API（供 Tauri 使用）
+│       ├── config.rs            # Config* 结构体
+│       ├── factory.rs           # build_analyzer(), load_config()
+│       ├── helpers.rs           # parse_custom_range(), serilog_range()
+│       ├── domain/
+│       │   ├── entities/
+│       │   │   ├── log_entry.rs     # LogEntry, LogLevel, ErrorEvent
+│       │   │   └── report.rs        # Report, Issue, Suggestion, Severity
+│       │   ├── ports/
+│       │   │   ├── data_source.rs   # trait DataSource
+│       │   │   ├── analyzer.rs      # trait Analyzer, AnalysisInput/Output
+│       │   │   └── report_writer.rs # trait ReportWriter
+│       │   └── value_objects/
+│       │       └── secret_key.rs    # SecretKey（ZeroizeOnDrop + 审计日志）
+│       ├── application/
+│       │   ├── dtos/                # QueryRange, ReportDto
+│       │   └── use_cases/
+│       │       └── generate_report.rs
+│       ├── infrastructure/
+│       │   ├── newrelic/            # New Relic NerdGraph API
+│       │   ├── claude/              # Claude API 分析器
+│       │   ├── openai/              # OpenAI API 分析器
+│       │   ├── local/
+│       │   │   ├── analyzer.rs      # LocalAnalyzer（规则组合器）
+│       │   │   └── rules/
+│       │   │       ├── rule.rs      # trait LocalRule
+│       │   │       ├── sensitive.rs # 敏感数据检测
+│       │   │       └── endpoint.rs  # 接口统计
+│       │   ├── serilog/             # Serilog 本地日志解析
+│       │   ├── output/              # TerminalWriter, MarkdownWriter
+│       │   └── shared/
+│       │       └── prompt.rs        # 共享 Prompt 构建（zh/en）
+│       └── interfaces/
+│           └── cli/                 # clap CLI 命令定义
+├── src-tauri/                   # Tauri 2.0 桌面应用
+│   ├── Cargo.toml
+│   ├── tauri.conf.json
+│   └── src/
+│       ├── main.rs
+│       ├── lib.rs               # Tauri app builder
+│       ├── state.rs             # AppState
+│       └── commands/            # report.rs, config.rs
+└── frontend/                    # 桌面 GUI（HTML/CSS/JS）
+    ├── index.html
+    ├── styles.css
+    └── main.js
 ```
 
 ---
@@ -224,7 +242,7 @@ ops-insight/
 
 ### 添加新的本地分析规则
 
-1. 在 `src/infrastructure/local/rules/` 创建新文件
+1. 在 `ops-insight-core/src/infrastructure/local/rules/` 创建新文件
 2. 实现 `LocalRule` trait：
 
 ```rust
@@ -248,7 +266,7 @@ impl LocalRule for MyRule {
 
 ### 添加新的数据源
 
-1. 在 `src/infrastructure/` 创建新模块
+1. 在 `ops-insight-core/src/infrastructure/` 创建新模块
 2. 实现 `DataSource` trait：
 
 ```rust
@@ -259,11 +277,11 @@ impl DataSource for MyDataSource {
 }
 ```
 
-3. 在 `main.rs` 中添加对应的 CLI 命令和构建逻辑
+3. 在 `ops-insight-core/src/main.rs` 中添加对应的 CLI 命令和构建逻辑
 
 ### 添加新的分析引擎
 
-1. 在 `src/infrastructure/` 创建新模块
+1. 在 `ops-insight-core/src/infrastructure/` 创建新模块
 2. 实现 `Analyzer` trait：
 
 ```rust
@@ -273,12 +291,12 @@ impl Analyzer for MyAnalyzer {
 }
 ```
 
-3. 在 `config.example.toml` 的 `[analyzer]` 中添加新的 `provider` 值
-4. 在 `main.rs` 的 `build_analyzer()` 中添加对应分支
+3. 在 `ops-insight-core/config.example.toml` 的 `[analyzer]` 中添加新的 `provider` 值
+4. 在 `ops-insight-core/src/factory.rs` 的 `build_analyzer()` 中添加对应分支
 
 ### 添加新的输出格式
 
-1. 在 `src/infrastructure/output/` 创建新文件
+1. 在 `ops-insight-core/src/infrastructure/output/` 创建新文件
 2. 实现 `ReportWriter` trait：
 
 ```rust

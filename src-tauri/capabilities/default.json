@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.0.0/acl/capability.schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "shell:allow-open"
+  ]
+}

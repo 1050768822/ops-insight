@@ -20,7 +20,7 @@ impl QueryRange {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportDto {
     pub title: String,
     pub period: ReportPeriod,
@@ -29,7 +29,7 @@ pub struct ReportDto {
     pub suggestions: Vec<SuggestionDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IssueDto {
     pub severity: Severity,
     pub title: String,
@@ -38,7 +38,7 @@ pub struct IssueDto {
     pub occurrence_count: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SuggestionDto {
     pub priority: String,
     pub title: String,

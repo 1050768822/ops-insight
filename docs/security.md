@@ -2,7 +2,7 @@
 
 ## 1. SecretKey 包装类型
 
-位置：`src/domain/value_objects/secret_key.rs`
+位置：`ops-insight-core/src/domain/value_objects/secret_key.rs`
 
 - 将密钥存储在私有字段中，外部不可直接访问
 - `Debug`/`Display` 输出 `[REDACTED]` — 永远不泄露实际值
