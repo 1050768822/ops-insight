@@ -14,10 +14,10 @@ Rust CLI 工具，读取运维日志（New Relic API 或本地 Serilog 文件）
 
 编写代码前必须阅读对应文档：
 
-- 架构规则：`docs/clean-architecture.md`
-- Rust 规范：`docs/rust-guidelines.md`
-- 安全规则：`docs/security.md`
-- 日志格式：`docs/log-formats.md`
+- 架构规则：`../coordination/docs/clean-architecture.md`
+- Rust 规范：`../coordination/docs/rust-guidelines.md`
+- 安全规则：`../coordination/docs/security.md`
+- 日志格式：`../coordination/docs/log-formats.md`
 
 ---
 

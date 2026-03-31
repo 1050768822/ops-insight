@@ -30,7 +30,10 @@ pub fn build_analyzer(config: &Config) -> anyhow::Result<Arc<dyn Analyzer>> {
                 language,
             )))
         }
-        "local" => Ok(Arc::new(LocalAnalyzer::with_default_rules(language))),
+        "local" => Ok(Arc::new(LocalAnalyzer::with_desensitize_config(
+            language,
+            config.desensitize.clone(),
+        ))),
         other => anyhow::bail!(
             "未知的 analyzer.provider = \"{other}\"，支持: \"claude\" | \"openai\" | \"local\""
         ),

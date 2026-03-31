@@ -20,7 +20,22 @@ impl LocalAnalyzer {
         use super::rules::{EndpointStatsRule, SensitiveDataRule};
         Self::new(
             vec![
-                Arc::new(SensitiveDataRule),
+                Arc::new(SensitiveDataRule::default()),
+                Arc::new(EndpointStatsRule::default()),
+            ],
+            language,
+        )
+    }
+
+    /// 使用指定脱敏配置构建
+    pub fn with_desensitize_config(
+        language: String,
+        cfg: crate::config::DesensitizeConfig,
+    ) -> Self {
+        use super::rules::{EndpointStatsRule, SensitiveDataRule};
+        Self::new(
+            vec![
+                Arc::new(SensitiveDataRule::new(cfg)),
                 Arc::new(EndpointStatsRule::default()),
             ],
             language,

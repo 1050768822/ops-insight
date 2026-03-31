@@ -29,6 +29,10 @@ pub fn run() {
             commands::config::save_config_cmd,
             commands::config::init_config_cmd,
             commands::config::get_config_path,
+            commands::desensitize::get_builtin_labels,
+            commands::desensitize::get_desensitize_config,
+            commands::desensitize::save_desensitize_config,
+            commands::desensitize::validate_pattern,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

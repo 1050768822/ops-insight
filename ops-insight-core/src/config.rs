@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Default)]
 pub struct Config {
@@ -9,6 +9,32 @@ pub struct Config {
     pub output: OutputConfig,
     #[serde(default)]
     pub servers: Vec<ServerConfig>,
+    #[serde(default)]
+    pub desensitize: DesensitizeConfig,
+}
+
+#[derive(Deserialize, Serialize, Clone, Default)]
+pub struct DesensitizeConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    /// 要禁用的内置规则名称列表（如 "密码明文"、"JWT Token"）
+    #[serde(default)]
+    pub disabled_builtin: Vec<String>,
+    /// 用户自定义的正则模式
+    #[serde(default)]
+    pub custom_patterns: Vec<PatternConfig>,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PatternConfig {
+    pub name: String,
+    pub pattern: String,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]

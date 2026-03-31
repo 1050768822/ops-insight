@@ -17,8 +17,12 @@ pub use application::use_cases::generate_report::{
 
 // Config types
 pub use config::{
-    AnalyzerConfig, ClaudeConfig, Config, NewRelicConfig, OpenAiConfig, OutputConfig, ServerConfig,
+    AnalyzerConfig, ClaudeConfig, Config, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
+    OutputConfig, PatternConfig, ServerConfig,
 };
+
+// Builtin pattern labels for desensitize UI
+pub use infrastructure::local::rules::sensitive::builtin_pattern_labels;
 
 // Factory functions
 pub use factory::{build_analyzer, load_config};

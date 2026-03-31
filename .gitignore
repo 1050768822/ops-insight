@@ -1,3 +1,7 @@
 /target
 config.toml
 reports/
+.claude/
+docs/
+claude.md
+agents.md

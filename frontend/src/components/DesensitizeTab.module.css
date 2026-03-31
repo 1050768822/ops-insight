@@ -1,0 +1,213 @@
+.wrap {
+  padding: 24px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted, #64748b);
+}
+
+/* 总开关行 */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.masterLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.masterLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent, #3b82f6);
+  cursor: pointer;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+}
+
+/* 区块 */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 内置规则 chip grid */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+.chip {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chipOn {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+
+.chipOff {
+  background: var(--surface, #1e293b);
+  color: var(--text-muted, #64748b);
+  border-color: var(--border, #334155);
+}
+
+/* 自定义规则行 */
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--border, #334155);
+  border-radius: 8px;
+}
+
+.customCheck input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #3b82f6);
+  cursor: pointer;
+}
+
+.customName {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.customPattern {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btnRemove {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnRemove:hover {
+  background: #ef444420;
+}
+
+/* 添加表单 */
+.addForm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #334155);
+  background: var(--surface, #1e293b);
+  color: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--accent, #3b82f6);
+}
+
+.btnAdd {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.btnAdd:hover {
+  opacity: 0.85;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+  padding: 8px 0;
+}
+
+/* 保存按钮 */
+.btnSave {
+  align-self: flex-start;
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btnSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSave:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.success {
+  font-size: 13px;
+  color: #22c55e;
+}
+
+.error {
+  font-size: 13px;
+  color: #ef4444;
+}

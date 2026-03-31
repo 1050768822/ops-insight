@@ -1,0 +1,78 @@
+.wrap { max-width: 800px; }
+
+.empty {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 60px 0;
+  text-align: center;
+}
+.emptySection {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 16px 0 8px;
+}
+
+.header { margin-bottom: 28px; }
+
+.title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+
+.period { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+
+.summary {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px 16px;
+}
+
+.sectionTitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 24px 0 10px;
+  text-transform: uppercase;
+}
+.count { font-weight: 400; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  padding: 14px 16px;
+}
+
+/* Severity badges */
+.badge {
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+.sev_critical { background: var(--critical); color: #fff; }
+.sev_high     { background: var(--high);     color: #fff; }
+.sev_medium   { background: var(--medium);   color: #1c1917; }
+.sev_low      { background: var(--low);      color: #fff; }
+
+.issueHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.issueTitle { font-size: 14px; font-weight: 600; }
+.issueDesc  { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+.issueMeta  { color: var(--muted); font-size: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+/* Priority left-border for suggestions */
+.prio_high   { border-left: 3px solid var(--critical); }
+.prio_medium { border-left: 3px solid var(--medium); }
+.prio_low    { border-left: 3px solid var(--low); }
+
+.suggTitle  { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.suggDetail { color: var(--muted); font-size: 13px; line-height: 1.5; }
