@@ -9,7 +9,7 @@ New Relic 运维报告 CLI 工具，支持从 New Relic 拉取服务器日志与
 ### 1. 安装
 
 ```bash
-git clone https://github.com/yourname/ops-insight
+git clone https://github.com/<your-org-or-user>/ops-insight
 cd ops-insight
 cargo build -p ops-insight-core --release
 # 可选：安装到系统路径
@@ -40,6 +40,13 @@ ops-insight custom --from 2026-03-01 --to 2026-03-07
 ops-insight serilog --path ./logs/
 ops-insight serilog --path ./logs/log_20260327.log
 ops-insight serilog --path ./logs/ --from 2026-03-20 --to 2026-03-27
+```
+
+### 4. 桌面应用开发
+
+```bash
+cd frontend && npm ci
+cd ../src-tauri && cargo tauri dev
 ```
 
 ---
@@ -176,13 +183,11 @@ infrastructure (New Relic, Claude, OpenAI, Local, Output)
 ```
 ops-insight/
 ├── Cargo.toml                   # workspace manifest
+├── .github/
+│   └── workflows/
+│       └── build.yml            # GitHub Actions: CLI + Desktop build/release
 ├── CLAUDE.md                    # AI 编码助手规则
 ├── AGENTS.md                    # AI Agent 规则
-├── docs/
-│   ├── clean-architecture.md
-│   ├── rust-guidelines.md
-│   ├── security.md
-│   └── log-formats.md
 ├── ops-insight-core/            # 共享库 + CLI 二进制
 │   ├── Cargo.toml
 │   ├── config.example.toml
@@ -229,11 +234,15 @@ ops-insight/
 │       ├── main.rs
 │       ├── lib.rs               # Tauri app builder
 │       ├── state.rs             # AppState
-│       └── commands/            # report.rs, config.rs
+│       └── commands/            # report.rs, config.rs, desensitize.rs
 └── frontend/                    # 桌面 GUI（HTML/CSS/JS）
+    ├── package.json
     ├── index.html
-    ├── styles.css
-    └── main.js
+    ├── vite.config.ts
+    └── src/
+        ├── main.tsx
+        ├── App.tsx
+        └── components/
 ```
 
 ---
@@ -330,7 +339,7 @@ impl ReportWriter for SlackWriter {
 
 | 文档 | 说明 |
 |------|------|
-| [clean-architecture.md](docs/clean-architecture.md) | 架构分层规则与扩展点说明 |
-| [rust-guidelines.md](docs/rust-guidelines.md) | Rust 编码规范与异步模式 |
-| [security.md](docs/security.md) | API Key 安全处理规则 |
-| [log-formats.md](docs/log-formats.md) | 支持的日志格式规范 |
+| [clean-architecture.md](../coordination/docs/clean-architecture.md) | 架构分层规则与扩展点说明 |
+| [rust-guidelines.md](../coordination/docs/rust-guidelines.md) | Rust 编码规范与异步模式 |
+| [security.md](../coordination/docs/security.md) | API Key 安全处理规则 |
+| [log-formats.md](../coordination/docs/log-formats.md) | 支持的日志格式规范 |
