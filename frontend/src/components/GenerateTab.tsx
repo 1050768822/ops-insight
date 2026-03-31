@@ -20,8 +20,13 @@ export function GenerateTab({ onReportReady }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const pickFile = async () => {
+  const pickSerilogFile = async () => {
     const selected = await openDialog({ multiple: false, directory: false })
+    if (selected) setSerilogPath(selected as string)
+  }
+
+  const pickSerilogDirectory = async () => {
+    const selected = await openDialog({ multiple: false, directory: true })
     if (selected) setSerilogPath(selected as string)
   }
 
@@ -38,7 +43,7 @@ export function GenerateTab({ onReportReady }: Props) {
         if (!customFrom || !customTo) throw new Error('请选择开始和结束日期')
         report = await invoke('generate_custom_report', { from: customFrom, to: customTo })
       } else {
-        if (!serilogPath) throw new Error('请先选择日志文件路径')
+        if (!serilogPath) throw new Error('请先选择日志文件或文件夹路径')
         report = await invoke('generate_serilog_report', {
           path: serilogPath,
           from: serilogFrom || null,
@@ -57,7 +62,7 @@ export function GenerateTab({ onReportReady }: Props) {
     { value: 'daily',   label: '昨日报告' },
     { value: 'weekly',  label: '周报告（7天）' },
     { value: 'custom',  label: '自定义范围' },
-    { value: 'serilog', label: 'Serilog 文件' },
+    { value: 'serilog', label: 'Serilog 文件 / 文件夹' },
   ]
 
   return (
@@ -105,7 +110,8 @@ export function GenerateTab({ onReportReady }: Props) {
         <div className={styles.group}>
           <label className={styles.label}>日志路径</label>
           <div className={styles.fileRow}>
-            <button className={styles.btnSecondary} onClick={pickFile}>选择文件</button>
+            <button className={styles.btnSecondary} onClick={pickSerilogFile}>选择文件</button>
+            <button className={styles.btnSecondary} onClick={pickSerilogDirectory}>选择文件夹</button>
             <span className={styles.filepath}>{serilogPath || '未选择'}</span>
           </div>
           <div className={styles.dateRow} style={{ marginTop: 12 }}>
