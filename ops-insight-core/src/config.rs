@@ -5,6 +5,7 @@ pub struct Config {
     pub newrelic: NewRelicConfig,
     pub analyzer: AnalyzerConfig,
     pub claude: ClaudeConfig,
+    pub deepseek: DeepSeekConfig,
     pub openai: OpenAiConfig,
     pub output: OutputConfig,
     #[serde(default)]
@@ -62,6 +63,17 @@ pub struct ClaudeConfig {
 
 fn default_claude_model() -> String {
     "claude-opus-4-6".to_string()
+}
+
+#[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]
+pub struct DeepSeekConfig {
+    pub api_key: String,
+    #[serde(default = "default_deepseek_model")]
+    pub model: String,
+}
+
+fn default_deepseek_model() -> String {
+    "deepseek-chat".to_string()
 }
 
 #[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]

@@ -61,12 +61,16 @@ api_key = "NRAK-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 account_id = "1234567"
 
 [analyzer]
-# 选择分析引擎: "claude" | "openai" | "local"
+# 选择分析引擎: "claude" | "deepseek" | "openai" | "local"
 provider = "local"
 
 [claude]
 api_key = "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 model = "claude-opus-4-6"
+
+[deepseek]
+api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+model = "deepseek-chat"
 
 [openai]
 api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -110,6 +114,7 @@ hostname = "worker-01.example.com"
 | 引擎 | 配置 | 特点 |
 |------|------|------|
 | `claude` | 需要 Claude API Key | 深度语义分析，中英文报告质量最高 |
+| `deepseek` | 需要 DeepSeek API Key | OpenAI 兼容接口，适合作为成本更低的在线分析选项 |
 | `openai` | 需要 OpenAI API Key | GPT-4o 分析，可作为 Claude 替代 |
 | `local` | 无需 API Key | 本地规则引擎，支持离线分析，适合敏感环境 |
 
@@ -148,6 +153,7 @@ security add-generic-password -a $USER -s openai_api_key -w "sk-xxx"
 ```bash
 export NEWRELIC_API_KEY="NRAK-xxx"
 export CLAUDE_API_KEY="sk-ant-xxx"
+export DEEPSEEK_API_KEY="sk-xxx"
 export OPENAI_API_KEY="sk-xxx"
 ```
 

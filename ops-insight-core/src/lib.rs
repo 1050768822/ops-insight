@@ -17,7 +17,7 @@ pub use application::use_cases::generate_report::{
 
 // Config types
 pub use config::{
-    AnalyzerConfig, ClaudeConfig, Config, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
+    AnalyzerConfig, ClaudeConfig, Config, DeepSeekConfig, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
     OutputConfig, PatternConfig, ServerConfig,
 };
 
@@ -36,6 +36,7 @@ pub use domain::value_objects::SecretKey;
 
 // Infrastructure implementations
 pub use infrastructure::claude::ClaudeAnalyzer;
+pub use infrastructure::deepseek::DeepSeekAnalyzer;
 pub use infrastructure::local::LocalAnalyzer;
 pub use infrastructure::newrelic::NewRelicSource;
 pub use infrastructure::openai::OpenAiAnalyzer;

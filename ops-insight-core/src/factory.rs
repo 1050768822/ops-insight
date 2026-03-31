@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::domain::ports::Analyzer;
 use crate::domain::value_objects::SecretKey;
 use crate::infrastructure::claude::ClaudeAnalyzer;
+use crate::infrastructure::deepseek::DeepSeekAnalyzer;
 use crate::infrastructure::local::LocalAnalyzer;
 use crate::infrastructure::openai::OpenAiAnalyzer;
 
@@ -30,12 +31,22 @@ pub fn build_analyzer(config: &Config) -> anyhow::Result<Arc<dyn Analyzer>> {
                 language,
             )))
         }
+        "deepseek" => {
+            if config.deepseek.api_key.is_empty() {
+                anyhow::bail!("analyzer.provider = \"deepseek\" 但 [deepseek] api_key 未配置");
+            }
+            Ok(Arc::new(DeepSeekAnalyzer::new(
+                SecretKey::new("deepseek_api_key", config.deepseek.api_key.clone()),
+                config.deepseek.model.clone(),
+                language,
+            )))
+        }
         "local" => Ok(Arc::new(LocalAnalyzer::with_desensitize_config(
             language,
             config.desensitize.clone(),
         ))),
         other => anyhow::bail!(
-            "未知的 analyzer.provider = \"{other}\"，支持: \"claude\" | \"openai\" | \"local\""
+            "未知的 analyzer.provider = \"{other}\"，支持: \"claude\" | \"openai\" | \"deepseek\" | \"local\""
         ),
     }
 }
@@ -64,6 +75,11 @@ pub fn load_config(path: &str) -> anyhow::Result<Config> {
         config.openai.api_key = v;
     } else if let Ok(v) = std::env::var("OPENAI_API_KEY") {
         config.openai.api_key = v;
+    }
+    if let Some(v) = keychain_get("deepseek_api_key") {
+        config.deepseek.api_key = v;
+    } else if let Ok(v) = std::env::var("DEEPSEEK_API_KEY") {
+        config.deepseek.api_key = v;
     }
 
     Ok(config)
