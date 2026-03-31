@@ -21,6 +21,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::report::get_analyzer_options,
+            commands::report::open_report_folder,
             commands::report::generate_daily_report,
             commands::report::generate_weekly_report,
             commands::report::generate_custom_report,

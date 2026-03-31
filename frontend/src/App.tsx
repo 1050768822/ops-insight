@@ -3,7 +3,7 @@ import { GenerateTab } from './components/GenerateTab'
 import { ReportTab } from './components/ReportTab'
 import { ConfigTab } from './components/ConfigTab'
 import { DesensitizeTab } from './components/DesensitizeTab'
-import type { ReportDto } from './types'
+import type { GenerateReportsResultDto } from './types'
 import styles from './App.module.css'
 
 type Tab = 'generate' | 'report' | 'config' | 'desensitize'
@@ -17,10 +17,10 @@ const TAB_LABELS: Record<Tab, string> = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('generate')
-  const [report, setReport] = useState<ReportDto | null>(null)
+  const [reportResult, setReportResult] = useState<GenerateReportsResultDto | null>(null)
 
-  const handleReportReady = (r: ReportDto) => {
-    setReport(r)
+  const handleReportReady = (result: GenerateReportsResultDto) => {
+    setReportResult(result)
     setActiveTab('report')
   }
 
@@ -40,7 +40,7 @@ export default function App() {
 
       <main className={styles.main}>
         {activeTab === 'generate'    && <GenerateTab onReportReady={handleReportReady} />}
-        {activeTab === 'report'      && <ReportTab report={report} />}
+        {activeTab === 'report'      && <ReportTab result={reportResult} />}
         {activeTab === 'config'      && <ConfigTab />}
         {activeTab === 'desensitize' && <DesensitizeTab />}
       </main>

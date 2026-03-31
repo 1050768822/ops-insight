@@ -25,7 +25,7 @@ pub use config::{
 pub use infrastructure::local::rules::sensitive::builtin_pattern_labels;
 
 // Factory functions
-pub use factory::{build_analyzer, load_config};
+pub use factory::{build_analyzer, build_analyzer_with_provider, load_config};
 
 // Range helpers
 pub use helpers::{init_config, parse_custom_range, serilog_range};

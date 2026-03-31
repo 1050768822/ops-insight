@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use async_trait::async_trait;
 use tokio::fs;
+use tracing::info;
 
 use crate::application::dtos::ReportDto;
 use crate::domain::entities::Severity;
@@ -9,11 +10,22 @@ use crate::domain::ports::ReportWriter;
 
 pub struct MarkdownWriter {
     output_dir: PathBuf,
+    filename_prefix: Option<String>,
 }
 
 impl MarkdownWriter {
     pub fn new(output_dir: PathBuf) -> Self {
-        Self { output_dir }
+        Self {
+            output_dir,
+            filename_prefix: None,
+        }
+    }
+
+    pub fn with_prefix(output_dir: PathBuf, filename_prefix: impl Into<String>) -> Self {
+        Self {
+            output_dir,
+            filename_prefix: Some(filename_prefix.into()),
+        }
     }
 
     fn render(report: &ReportDto) -> String {
@@ -70,12 +82,19 @@ impl ReportWriter for MarkdownWriter {
     async fn write(&self, report: &ReportDto) -> anyhow::Result<()> {
         fs::create_dir_all(&self.output_dir).await?;
 
-        let filename = format!("report_{}.md", chrono::Utc::now().format("%Y%m%d_%H%M%S"));
+        let filename = match &self.filename_prefix {
+            Some(prefix) => format!(
+                "report_{}_{}.md",
+                prefix,
+                chrono::Utc::now().format("%Y%m%d_%H%M%S_%f")
+            ),
+            None => format!("report_{}.md", chrono::Utc::now().format("%Y%m%d_%H%M%S_%f")),
+        };
         let path = self.output_dir.join(&filename);
 
         fs::write(&path, Self::render(report)).await?;
 
-        println!("报告已保存：{}", path.display());
+        info!(path = %path.display(), "report saved");
         Ok(())
     }
 }

@@ -1,8 +1,17 @@
-import type { IssueDto, ReportDto, SuggestionDto } from '../types'
+import { useEffect, useState } from 'react'
+import { invoke } from '@tauri-apps/api/core'
+import type { AnalyzerId, GenerateReportsResultDto, IssueDto, ReportDto, SuggestionDto } from '../types'
 import styles from './ReportTab.module.css'
 
 interface Props {
-  report: ReportDto | null
+  result: GenerateReportsResultDto | null
+}
+
+const ANALYZER_LABELS: Record<AnalyzerId, string> = {
+  local: '本地规则',
+  claude: 'Claude',
+  openai: 'OpenAI',
+  deepseek: 'DeepSeek',
 }
 
 const SEVERITY_LABEL: Record<IssueDto['severity'], string> = {
@@ -40,8 +49,17 @@ function SuggestionCard({ s }: { s: SuggestionDto }) {
   )
 }
 
-export function ReportTab({ report }: Props) {
-  if (!report) {
+export function ReportTab({ result }: Props) {
+  const [activeAnalyzer, setActiveAnalyzer] = useState<AnalyzerId | null>(null)
+  const [folderMessage, setFolderMessage] = useState('')
+  const [folderMessageType, setFolderMessageType] = useState<'ok' | 'err'>('ok')
+
+  useEffect(() => {
+    setActiveAnalyzer(result?.reports[0]?.analyzer ?? null)
+    setFolderMessage('')
+  }, [result])
+
+  if (!result || result.reports.length === 0) {
     return (
       <div className={styles.empty}>
         还没有报告，请先在「生成报告」页面运行分析。
@@ -49,15 +67,45 @@ export function ReportTab({ report }: Props) {
     )
   }
 
+  const current = result.reports.find(item => item.analyzer === activeAnalyzer) ?? result.reports[0]
+  const report: ReportDto = current.report
   const from = new Date(report.period.from).toLocaleDateString('zh-CN')
   const to   = new Date(report.period.to).toLocaleDateString('zh-CN')
+
+  const openFolder = async () => {
+    try {
+      await invoke('open_report_folder', { path: result.outputDir })
+      setFolderMessage(`已打开目录：${result.outputDir}`)
+      setFolderMessageType('ok')
+    } catch (e) {
+      setFolderMessage(String(e))
+      setFolderMessageType('err')
+    }
+  }
 
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
         <h1 className={styles.title}>{report.title}</h1>
         <div className={styles.period}>{from} — {to}</div>
+        <div className={styles.toolbar}>
+          <div className={styles.analyzerRow}>
+            {result.reports.map(item => (
+              <button
+                key={item.analyzer}
+                className={`${styles.analyzerChip} ${item.analyzer === current.analyzer ? styles.analyzerChipActive : ''}`}
+                onClick={() => setActiveAnalyzer(item.analyzer)}
+              >
+                {ANALYZER_LABELS[item.analyzer]}
+              </button>
+            ))}
+          </div>
+          <button className={styles.openBtn} onClick={openFolder}>打开所在文件夹</button>
+        </div>
         {report.summary && <div className={styles.summary}>{report.summary}</div>}
+        {folderMessage && (
+          <div className={folderMessageType === 'ok' ? styles.msgOk : styles.msgErr}>{folderMessage}</div>
+        )}
       </div>
 
       <div className={styles.sectionTitle}>

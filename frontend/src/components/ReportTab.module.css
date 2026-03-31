@@ -18,6 +18,49 @@
 
 .period { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
+.toolbar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.analyzerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analyzerChip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.analyzerChipActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.openBtn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.openBtn:hover { border-color: var(--accent); color: var(--accent); }
+
 .summary {
   background: var(--surface);
   border-left: 3px solid var(--accent);
@@ -25,6 +68,26 @@
   font-size: 14px;
   line-height: 1.6;
   padding: 12px 16px;
+}
+
+.msgOk,
+.msgErr {
+  border-radius: var(--radius);
+  font-size: 12px;
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.msgOk {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #86efac;
+}
+
+.msgErr {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid var(--critical);
+  color: #fca5a5;
 }
 
 .sectionTitle {

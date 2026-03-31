@@ -9,8 +9,15 @@ use crate::infrastructure::local::LocalAnalyzer;
 use crate::infrastructure::openai::OpenAiAnalyzer;
 
 pub fn build_analyzer(config: &Config) -> anyhow::Result<Arc<dyn Analyzer>> {
+    build_analyzer_with_provider(config, &config.analyzer.provider)
+}
+
+pub fn build_analyzer_with_provider(
+    config: &Config,
+    provider: &str,
+) -> anyhow::Result<Arc<dyn Analyzer>> {
     let language = config.output.language.clone();
-    match config.analyzer.provider.as_str() {
+    match provider {
         "claude" => {
             if config.claude.api_key.is_empty() {
                 anyhow::bail!("analyzer.provider = \"claude\" 但 [claude] api_key 未配置");

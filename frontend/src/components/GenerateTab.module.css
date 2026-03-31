@@ -1,6 +1,11 @@
 .wrap { max-width: 600px; }
 
 .group { margin-bottom: 24px; }
+.tip {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
 
 .label {
   display: block;
@@ -43,7 +48,7 @@
 }
 .dateInput:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
-.fileRow { display: flex; align-items: center; gap: 10px; }
+.fileRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .filepath {
   color: var(--muted);
   font-family: monospace;

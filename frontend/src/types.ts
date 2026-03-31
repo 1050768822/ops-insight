@@ -36,3 +36,20 @@ export interface ReportDto {
   issues: IssueDto[];
   suggestions: SuggestionDto[];
 }
+
+export type AnalyzerId = 'local' | 'claude' | 'openai' | 'deepseek';
+
+export interface GeneratedReportDto {
+  analyzer: AnalyzerId;
+  report: ReportDto;
+}
+
+export interface GenerateReportsResultDto {
+  reports: GeneratedReportDto[];
+  outputDir: string;
+}
+
+export interface AnalyzerOptionsDto {
+  supported: AnalyzerId[];
+  defaultSelected: AnalyzerId[];
+}
