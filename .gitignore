@@ -3,5 +3,5 @@ config.toml
 reports/
 .claude/
 docs/
-claude.md
-agents.md
+CLAUDE.md
+AGENTS.md
