@@ -53,3 +53,8 @@ export interface AnalyzerOptionsDto {
   supported: AnalyzerId[];
   defaultSelected: AnalyzerId[];
 }
+
+export interface PromptConfigDto {
+  zh: string;
+  en: string;
+}

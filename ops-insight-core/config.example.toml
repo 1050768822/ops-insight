@@ -29,6 +29,18 @@ output_dir = "./reports"
 # 报告语言: "zh"（中文，默认）| "en"（English）
 language = "zh"
 
+[prompt]
+# 在线分析器自定义 Prompt。留空时使用内置默认 Prompt。
+# 可用变量:
+#   {{period}}
+#   {{total_logs}}
+#   {{warning_count}}
+#   {{error_count}}
+#   {{fatal_count}}
+#   {{events}}
+zh = ""
+en = ""
+
 # 监控的服务器列表（留空则查询所有）
 [[servers]]
 name = "web-01"

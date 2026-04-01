@@ -1,10 +1,11 @@
 use crate::domain::entities::{ErrorEvent, LogLevel};
 use crate::domain::ports::AnalysisInput;
+use crate::config::PromptConfig;
 use crate::infrastructure::shared::redaction::redact_for_display;
 
 /// 根据语言配置构建分析 prompt。
 /// language: "zh"（默认）或 "en"
-pub fn build_prompt(input: &AnalysisInput, language: &str) -> String {
+pub fn build_prompt(input: &AnalysisInput, language: &str, prompt_config: &PromptConfig) -> String {
     let total = input.logs.len();
     let count = |level: &LogLevel| input.logs.iter().filter(|e| &e.level == level).count();
     let warn_count = count(&LogLevel::Warn);
@@ -20,23 +21,52 @@ pub fn build_prompt(input: &AnalysisInput, language: &str) -> String {
         .join("\n");
 
     match language {
-        "en" => build_en(
-            input,
-            total,
-            warn_count,
-            error_count,
-            fatal_count,
-            &event_lines,
-        ),
-        _ => build_zh(
-            input,
-            total,
-            warn_count,
-            error_count,
-            fatal_count,
-            &event_lines,
-        ),
+        "en" => {
+            let default_prompt = build_en(
+                input,
+                total,
+                warn_count,
+                error_count,
+                fatal_count,
+                &event_lines,
+            );
+            apply_template(&prompt_config.en, &default_prompt, input, total, warn_count, error_count, fatal_count, &event_lines)
+        }
+        _ => {
+            let default_prompt = build_zh(
+                input,
+                total,
+                warn_count,
+                error_count,
+                fatal_count,
+                &event_lines,
+            );
+            apply_template(&prompt_config.zh, &default_prompt, input, total, warn_count, error_count, fatal_count, &event_lines)
+        }
     }
+}
+
+fn apply_template(
+    template: &str,
+    default_prompt: &str,
+    input: &AnalysisInput,
+    total: usize,
+    warn: usize,
+    error: usize,
+    fatal: usize,
+    events: &str,
+) -> String {
+    if template.trim().is_empty() {
+        return default_prompt.to_string();
+    }
+
+    template
+        .replace("{{period}}", &input.period_label)
+        .replace("{{total_logs}}", &total.to_string())
+        .replace("{{warning_count}}", &warn.to_string())
+        .replace("{{error_count}}", &error.to_string())
+        .replace("{{fatal_count}}", &fatal.to_string())
+        .replace("{{events}}", events)
 }
 
 fn build_zh(

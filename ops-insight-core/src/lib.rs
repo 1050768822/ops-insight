@@ -18,7 +18,7 @@ pub use application::use_cases::generate_report::{
 // Config types
 pub use config::{
     AnalyzerConfig, ClaudeConfig, Config, DeepSeekConfig, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
-    OutputConfig, PatternConfig, ServerConfig,
+    OutputConfig, PatternConfig, PromptConfig, ServerConfig,
 };
 
 // Builtin pattern labels for desensitize UI

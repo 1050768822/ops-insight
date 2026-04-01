@@ -3,14 +3,16 @@ import { GenerateTab } from './components/GenerateTab'
 import { ReportTab } from './components/ReportTab'
 import { ConfigTab } from './components/ConfigTab'
 import { DesensitizeTab } from './components/DesensitizeTab'
+import { PromptTab } from './components/PromptTab'
 import type { GenerateReportsResultDto } from './types'
 import styles from './App.module.css'
 
-type Tab = 'generate' | 'report' | 'config' | 'desensitize'
+type Tab = 'generate' | 'report' | 'prompt' | 'config' | 'desensitize'
 
 const TAB_LABELS: Record<Tab, string> = {
   generate:    '生成报告',
   report:      '报告详情',
+  prompt:      'Prompt 配置',
   config:      '配置管理',
   desensitize: '脱敏配置',
 }
@@ -27,7 +29,7 @@ export default function App() {
   return (
     <div className={styles.layout}>
       <nav className={styles.nav}>
-        {(['generate', 'report', 'config', 'desensitize'] as Tab[]).map(tab => (
+        {(['generate', 'report', 'prompt', 'config', 'desensitize'] as Tab[]).map(tab => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
@@ -41,6 +43,7 @@ export default function App() {
       <main className={styles.main}>
         {activeTab === 'generate'    && <GenerateTab onReportReady={handleReportReady} />}
         {activeTab === 'report'      && <ReportTab result={reportResult} />}
+        {activeTab === 'prompt'      && <PromptTab />}
         {activeTab === 'config'      && <ConfigTab />}
         {activeTab === 'desensitize' && <DesensitizeTab />}
       </main>

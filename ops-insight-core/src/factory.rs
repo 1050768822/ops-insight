@@ -26,6 +26,7 @@ pub fn build_analyzer_with_provider(
                 SecretKey::new("claude_api_key", config.claude.api_key.clone()),
                 config.claude.model.clone(),
                 language,
+                config.prompt.clone(),
             )))
         }
         "openai" => {
@@ -36,6 +37,7 @@ pub fn build_analyzer_with_provider(
                 SecretKey::new("openai_api_key", config.openai.api_key.clone()),
                 config.openai.model.clone(),
                 language,
+                config.prompt.clone(),
             )))
         }
         "deepseek" => {
@@ -46,6 +48,7 @@ pub fn build_analyzer_with_provider(
                 SecretKey::new("deepseek_api_key", config.deepseek.api_key.clone()),
                 config.deepseek.model.clone(),
                 language,
+                config.prompt.clone(),
             )))
         }
         "local" => Ok(Arc::new(LocalAnalyzer::with_desensitize_config(

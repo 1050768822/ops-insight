@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+use crate::config::PromptConfig;
 use crate::domain::entities::{Issue, Priority, Severity, Suggestion};
 use crate::domain::ports::{AnalysisInput, AnalysisOutput, Analyzer};
 use crate::domain::value_objects::SecretKey;
@@ -10,15 +11,17 @@ pub struct ClaudeAnalyzer {
     api_key: SecretKey,
     model: String,
     language: String,
+    prompt_config: PromptConfig,
     client: reqwest::Client,
 }
 
 impl ClaudeAnalyzer {
-    pub fn new(api_key: SecretKey, model: String, language: String) -> Self {
+    pub fn new(api_key: SecretKey, model: String, language: String, prompt_config: PromptConfig) -> Self {
         Self {
             api_key,
             model,
             language,
+            prompt_config,
             client: reqwest::Client::new(),
         }
     }
@@ -73,7 +76,11 @@ struct RawSuggestion {
 #[async_trait]
 impl Analyzer for ClaudeAnalyzer {
     async fn analyze(&self, input: &AnalysisInput) -> anyhow::Result<AnalysisOutput> {
-        let prompt = crate::infrastructure::shared::prompt::build_prompt(input, &self.language);
+        let prompt = crate::infrastructure::shared::prompt::build_prompt(
+            input,
+            &self.language,
+            &self.prompt_config,
+        );
 
         let request = ClaudeRequest {
             model: self.model.clone(),
