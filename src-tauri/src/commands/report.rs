@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::UNIX_EPOCH;
 
 use serde::Serialize;
 use tauri::State;
@@ -25,14 +26,80 @@ pub struct GeneratedReportDto {
 #[serde(rename_all = "camelCase")]
 pub struct GenerateReportsResultDto {
     pub reports: Vec<GeneratedReportDto>,
+    pub failures: Vec<AnalyzerFailureDto>,
     pub output_dir: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AnalyzerFailureDto {
+    pub analyzer: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyzerOptionDto {
+    pub id: String,
+    pub enabled: bool,
+    pub reason: Option<String>,
+    pub selected_by_default: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AnalyzerOptionsDto {
-    pub supported: Vec<String>,
-    pub default_selected: Vec<String>,
+    pub analyzers: Vec<AnalyzerOptionDto>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReportHistoryItemDto {
+    pub file_name: String,
+    pub path: String,
+    pub modified_at: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReportHistoryContentDto {
+    pub file_name: String,
+    pub path: String,
+    pub content: String,
+}
+
+fn analyzer_unavailable_reason(config: &Config, analyzer: &str) -> Option<String> {
+    match analyzer {
+        "local" => None,
+        "claude" => {
+            if config.claude.api_key.trim().is_empty() {
+                Some("缺少 [claude].api_key 配置".to_string())
+            } else if config.claude.model.trim().is_empty() {
+                Some("缺少 [claude].model 配置".to_string())
+            } else {
+                None
+            }
+        }
+        "openai" => {
+            if config.openai.api_key.trim().is_empty() {
+                Some("缺少 [openai].api_key 配置".to_string())
+            } else if config.openai.model.trim().is_empty() {
+                Some("缺少 [openai].model 配置".to_string())
+            } else {
+                None
+            }
+        }
+        "deepseek" => {
+            if config.deepseek.api_key.trim().is_empty() {
+                Some("缺少 [deepseek].api_key 配置".to_string())
+            } else if config.deepseek.model.trim().is_empty() {
+                Some("缺少 [deepseek].model 配置".to_string())
+            } else {
+                None
+            }
+        }
+        other => Some(format!("不支持的分析器: {other}")),
+    }
 }
 
 fn resolve_output_dir(path: &str) -> Result<PathBuf, String> {
@@ -44,6 +111,11 @@ fn resolve_output_dir(path: &str) -> Result<PathBuf, String> {
     std::env::current_dir()
         .map(|cwd| cwd.join(output_dir))
         .map_err(|e| e.to_string())
+}
+
+fn load_raw_config(config_path: &PathBuf) -> Result<Config, String> {
+    let content = std::fs::read_to_string(config_path).map_err(|e| e.to_string())?;
+    toml::from_str(&content).map_err(|e| e.to_string())
 }
 
 fn normalize_analyzers(
@@ -84,28 +156,55 @@ async fn run_reports(
     let selected_analyzers = normalize_analyzers(&config.analyzer.provider, analyzers)?;
     let output_dir = resolve_output_dir(&config.output.output_dir)?;
     let mut reports = Vec::with_capacity(selected_analyzers.len());
+    let mut failures = Vec::new();
 
     for analyzer_name in selected_analyzers {
-        let analyzer =
-            build_analyzer_with_provider(&config, &analyzer_name).map_err(|e| e.to_string())?;
+        let analyzer = match build_analyzer_with_provider(&config, &analyzer_name) {
+            Ok(analyzer) => analyzer,
+            Err(err) => {
+                failures.push(AnalyzerFailureDto {
+                    analyzer: analyzer_name,
+                    reason: err.to_string(),
+                });
+                continue;
+            }
+        };
 
         let writers: Vec<Arc<dyn ops_insight_core::ReportWriter>> = vec![Arc::new(
             MarkdownWriter::with_prefix(output_dir.clone(), analyzer_name.clone()),
         )];
 
-        let report = GenerateReportUseCase::new(source.clone(), analyzer, writers)
+        match GenerateReportUseCase::new(source.clone(), analyzer, writers)
             .execute(range.clone())
             .await
-            .map_err(|e| e.to_string())?;
+        {
+            Ok(report) => {
+                reports.push(GeneratedReportDto {
+                    analyzer: analyzer_name,
+                    report,
+                });
+            }
+            Err(err) => {
+                failures.push(AnalyzerFailureDto {
+                    analyzer: analyzer_name,
+                    reason: err.to_string(),
+                });
+            }
+        }
+    }
 
-        reports.push(GeneratedReportDto {
-            analyzer: analyzer_name,
-            report,
-        });
+    if reports.is_empty() {
+        let message = failures
+            .iter()
+            .map(|item| format!("{}: {}", item.analyzer, item.reason))
+            .collect::<Vec<_>>()
+            .join("\n");
+        return Err(message);
     }
 
     Ok(GenerateReportsResultDto {
         reports,
+        failures,
         output_dir: output_dir.display().to_string(),
     })
 }
@@ -136,16 +235,82 @@ fn open_directory(path: &Path) -> Result<(), String> {
 
 #[tauri::command]
 pub fn get_analyzer_options(state: State<'_, AppState>) -> Result<AnalyzerOptionsDto, String> {
-    let content = std::fs::read_to_string(&state.config_path).map_err(|e| e.to_string())?;
-    let config: Config = toml::from_str(&content).map_err(|e| e.to_string())?;
+    let config = load_raw_config(&state.config_path)?;
     let default_selected = normalize_analyzers(&config.analyzer.provider, None)?;
+    let analyzers = SUPPORTED_ANALYZERS
+        .iter()
+        .map(|analyzer| {
+            let reason = analyzer_unavailable_reason(&config, analyzer);
+            let enabled = reason.is_none();
+            let selected_by_default =
+                enabled && default_selected.iter().any(|item| item == analyzer);
 
-    Ok(AnalyzerOptionsDto {
-        supported: SUPPORTED_ANALYZERS
-            .iter()
-            .map(|item| (*item).to_string())
-            .collect(),
-        default_selected,
+            AnalyzerOptionDto {
+                id: (*analyzer).to_string(),
+                enabled,
+                reason,
+                selected_by_default,
+            }
+        })
+        .collect();
+
+    Ok(AnalyzerOptionsDto { analyzers })
+}
+
+#[tauri::command]
+pub fn list_report_history(state: State<'_, AppState>) -> Result<Vec<ReportHistoryItemDto>, String> {
+    let config = load_raw_config(&state.config_path)?;
+    let output_dir = resolve_output_dir(&config.output.output_dir)?;
+
+    if !output_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut items = Vec::new();
+    let entries = std::fs::read_dir(&output_dir).map_err(|e| e.to_string())?;
+
+    for entry in entries {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        if path.extension().and_then(|value| value.to_str()) != Some("md") {
+            continue;
+        }
+
+        let metadata = entry.metadata().map_err(|e| e.to_string())?;
+        let modified_at = metadata
+            .modified()
+            .ok()
+            .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
+            .map(|duration| duration.as_secs() as i64);
+
+        items.push(ReportHistoryItemDto {
+            file_name: entry.file_name().to_string_lossy().to_string(),
+            path: path.display().to_string(),
+            modified_at,
+        });
+    }
+
+    items.sort_by(|left, right| right.modified_at.cmp(&left.modified_at));
+    Ok(items)
+}
+
+#[tauri::command]
+pub fn load_report_history(path: String) -> Result<ReportHistoryContentDto, String> {
+    let report_path = PathBuf::from(&path);
+    let content = std::fs::read_to_string(&report_path).map_err(|e| e.to_string())?;
+    let file_name = report_path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .ok_or_else(|| "无效的报告文件名".to_string())?
+        .to_string();
+
+    Ok(ReportHistoryContentDto {
+        file_name,
+        path,
+        content,
     })
 }
 

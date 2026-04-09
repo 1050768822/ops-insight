@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { open as openDialog } from '@tauri-apps/plugin-dialog'
-import type { AnalyzerId, AnalyzerOptionsDto, GenerateReportsResultDto } from '../types'
+import type { AnalyzerId, AnalyzerOptionDto, AnalyzerOptionsDto, GenerateReportsResultDto } from '../types'
 import styles from './GenerateTab.module.css'
 
 type ReportType = 'daily' | 'weekly' | 'custom' | 'serilog'
@@ -25,7 +25,7 @@ export function GenerateTab({ onReportReady }: Props) {
   const [serilogFrom, setSerilogFrom] = useState('')
   const [serilogTo, setSerilogTo] = useState('')
   const [analyzers, setAnalyzers] = useState<AnalyzerId[]>([])
-  const [supportedAnalyzers, setSupportedAnalyzers] = useState<AnalyzerId[]>([])
+  const [analyzerOptions, setAnalyzerOptions] = useState<AnalyzerOptionDto[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -33,8 +33,12 @@ export function GenerateTab({ onReportReady }: Props) {
     const loadAnalyzerOptions = async () => {
       try {
         const options = await invoke<AnalyzerOptionsDto>('get_analyzer_options')
-        setSupportedAnalyzers(options.supported)
-        setAnalyzers(options.defaultSelected)
+        setAnalyzerOptions(options.analyzers)
+        setAnalyzers(
+          options.analyzers
+            .filter(item => item.enabled && item.selectedByDefault)
+            .map(item => item.id),
+        )
       } catch (e) {
         setError(String(e))
       }
@@ -98,10 +102,31 @@ export function GenerateTab({ onReportReady }: Props) {
     { value: 'custom',  label: '自定义范围' },
     { value: 'serilog', label: 'Serilog 文件 / 文件夹' },
   ]
+  const supportedAnalyzers = analyzerOptions.filter(item => item.enabled)
+  const unsupportedAnalyzers = analyzerOptions.filter(item => !item.enabled)
 
   return (
     <div className={styles.wrap}>
-      {/* 报告类型 */}
+      <section className={styles.hero}>
+        <div>
+          <div className={styles.kicker}>REPORT ORCHESTRATION</div>
+          <h2 className={styles.title}>生成新一轮巡检报告</h2>
+          <p className={styles.description}>
+            选择时间范围、数据入口和分析器组合，生成可追溯的 Markdown 输出。
+          </p>
+        </div>
+        <div className={styles.statGrid}>
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>MODE</span>
+            <strong className={styles.statValue}>{TYPES.find(item => item.value === rtype)?.label}</strong>
+          </div>
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>ANALYZERS</span>
+            <strong className={styles.statValue}>{analyzers.length}</strong>
+          </div>
+        </div>
+      </section>
+
       <div className={styles.group}>
         <label className={styles.label}>报告类型</label>
         <div className={styles.radioRow}>
@@ -124,22 +149,33 @@ export function GenerateTab({ onReportReady }: Props) {
       <div className={styles.group}>
         <label className={styles.label}>分析器</label>
         <div className={styles.radioRow}>
-          {supportedAnalyzers.map(analyzer => (
+          {supportedAnalyzers.map(option => (
             <label
-              key={analyzer}
-              className={`${styles.chip} ${analyzers.includes(analyzer) ? styles.chipActive : ''}`}
+              key={option.id}
+              className={`${styles.chip} ${analyzers.includes(option.id) ? styles.chipActive : ''}`}
             >
               <input
                 type="checkbox"
-                checked={analyzers.includes(analyzer)}
-                onChange={() => toggleAnalyzer(analyzer)}
+                checked={analyzers.includes(option.id)}
+                onChange={() => toggleAnalyzer(option.id)}
                 className={styles.hidden}
               />
-              {ANALYZER_LABELS[analyzer]}
+              {ANALYZER_LABELS[option.id]}
             </label>
           ))}
         </div>
-        <div className={styles.tip}>可多选，将按所选分析器分别生成报告文件。</div>
+        <div className={styles.tip}>这里显示当前可选择的分析器。可多选，将按所选分析器分别生成报告文件。</div>
+        {unsupportedAnalyzers.length > 0 && (
+          <div className={styles.unavailableBox}>
+            <div className={styles.unavailableTitle}>不可用分析器</div>
+            {unsupportedAnalyzers.map(item => (
+              <div key={item.id} className={styles.unavailableItem}>
+                <span className={styles.unavailableName}>{ANALYZER_LABELS[item.id]}</span>
+                <span className={styles.unavailableReason}>{item.reason || '当前不可用'}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 自定义范围 */}
@@ -184,9 +220,12 @@ export function GenerateTab({ onReportReady }: Props) {
       )}
 
       {/* 运行按钮 */}
-      <button className={styles.btn} onClick={run} disabled={loading}>
-        {loading ? '分析中…' : '生成报告'}
-      </button>
+      <div className={styles.actionBar}>
+        <button className={styles.btn} onClick={run} disabled={loading}>
+          {loading ? '分析中…' : '生成报告'}
+        </button>
+        <div className={styles.actionHint}>输出将按分析器分别写入报告目录，便于横向对比。</div>
+      </div>
 
       {/* 进度 */}
       {loading && (

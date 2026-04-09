@@ -1,15 +1,15 @@
 .wrap {
-  padding: 24px;
-  max-width: 760px;
+  color: var(--ink);
+  max-width: 960px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .loading {
   padding: 40px;
   text-align: center;
-  color: var(--text-muted, #64748b);
+  color: var(--muted);
 }
 
 /* 总开关行 */
@@ -17,13 +17,17 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  background: linear-gradient(135deg, #001e2b, #123746);
+  border-radius: 28px;
+  color: var(--text);
+  padding: 22px 24px;
 }
 
 .masterLabel {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -31,28 +35,33 @@
 .masterLabel input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: var(--accent, #3b82f6);
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
 .hint {
-  font-size: 12px;
-  color: var(--text-muted, #64748b);
+  font-size: 0.84rem;
+  color: var(--text-soft);
 }
 
 /* 区块 */
 .section {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 20px 22px;
 }
 
 .sectionTitle {
-  font-size: 13px;
+  color: var(--ink);
+  font-family: var(--font-code);
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted, #64748b);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.16em;
 }
 
 /* 内置规则 chip grid */
@@ -67,23 +76,24 @@
 }
 
 .chip {
-  padding: 5px 14px;
+  padding: 8px 14px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 0.9rem;
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .chipOn {
-  background: var(--accent, #3b82f6);
-  color: #fff;
+  background: linear-gradient(135deg, rgba(0, 104, 74, 0.92), rgba(0, 237, 100, 0.82));
+  color: #001e2b;
+  font-weight: 700;
 }
 
 .chipOff {
-  background: var(--surface, #1e293b);
-  color: var(--text-muted, #64748b);
-  border-color: var(--border, #334155);
+  background: #fff;
+  color: var(--muted);
+  border-color: var(--border-soft);
 }
 
 /* 自定义规则行 */
@@ -91,30 +101,30 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  background: var(--surface, #1e293b);
-  border: 1px solid var(--border, #334155);
-  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fbfcfc;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
 }
 
 .customCheck input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: var(--accent, #3b82f6);
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
 .customName {
-  font-size: 13px;
+  font-size: 0.9rem;
   font-weight: 600;
   min-width: 80px;
 }
 
 .customPattern {
   flex: 1;
-  font-size: 12px;
-  color: var(--text-muted, #64748b);
-  font-family: monospace;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-family: var(--font-code);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,30 +150,32 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .input {
   flex: 1;
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border, #334155);
-  background: var(--surface, #1e293b);
+  min-width: 220px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
   color: inherit;
-  font-size: 13px;
+  font-size: 0.9rem;
   outline: none;
 }
 
 .input:focus {
-  border-color: var(--accent, #3b82f6);
+  border-color: var(--accent-h);
 }
 
 .btnAdd {
-  padding: 7px 16px;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent, #3b82f6);
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-deep);
+  background: var(--accent-deep);
   color: #fff;
-  font-size: 13px;
+  font-size: 0.9rem;
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.15s;
@@ -174,20 +186,20 @@
 }
 
 .empty {
-  font-size: 13px;
-  color: var(--text-muted, #64748b);
+  font-size: 0.88rem;
+  color: var(--muted);
   padding: 8px 0;
 }
 
 /* 保存按钮 */
 .btnSave {
   align-self: flex-start;
-  padding: 10px 28px;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent, #3b82f6);
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-deep);
+  background: var(--accent-deep);
   color: #fff;
-  font-size: 14px;
+  font-size: 0.94rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -203,11 +215,11 @@
 }
 
 .success {
-  font-size: 13px;
-  color: #22c55e;
+  font-size: 0.88rem;
+  color: #0f8a4f;
 }
 
 .error {
-  font-size: 13px;
-  color: #ef4444;
+  font-size: 0.88rem;
+  color: #b42318;
 }

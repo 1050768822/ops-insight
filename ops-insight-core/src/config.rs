@@ -2,11 +2,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Default)]
 pub struct Config {
+    #[serde(default)]
     pub newrelic: NewRelicConfig,
+    #[serde(default)]
     pub analyzer: AnalyzerConfig,
+    #[serde(default)]
     pub claude: ClaudeConfig,
+    #[serde(default)]
     pub deepseek: DeepSeekConfig,
+    #[serde(default)]
     pub openai: OpenAiConfig,
+    #[serde(default)]
     pub output: OutputConfig,
     #[serde(default)]
     pub prompt: PromptConfig,

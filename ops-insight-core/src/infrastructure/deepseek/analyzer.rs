@@ -126,7 +126,8 @@ impl Analyzer for DeepSeekAnalyzer {
             .map(|c| c.message.content)
             .unwrap_or_default();
 
-        let raw: RawAnalysis = serde_json::from_str(&text).map_err(|e| {
+        let json_text = crate::infrastructure::shared::json::extract_json_payload(&text);
+        let raw: RawAnalysis = serde_json::from_str(json_text).map_err(|e| {
             let safe_text = redact_for_display(&text, 300);
             anyhow::anyhow!("DeepSeek 返回格式解析失败: {e}；内容摘要: {safe_text}")
         })?;
