@@ -1,16 +1,33 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Config {
+    #[serde(default)]
     pub newrelic: NewRelicConfig,
+    #[serde(default)]
     pub analyzer: AnalyzerConfig,
+    #[serde(default)]
     pub claude: ClaudeConfig,
+    #[serde(default)]
+    pub deepseek: DeepSeekConfig,
+    #[serde(default)]
     pub openai: OpenAiConfig,
+    #[serde(default)]
     pub output: OutputConfig,
+    #[serde(default)]
+    pub prompt: PromptConfig,
     #[serde(default)]
     pub servers: Vec<ServerConfig>,
     #[serde(default)]
     pub desensitize: DesensitizeConfig,
+}
+
+#[derive(Deserialize, Serialize, Clone, Default)]
+pub struct PromptConfig {
+    #[serde(default)]
+    pub zh: String,
+    #[serde(default)]
+    pub en: String,
 }
 
 #[derive(Deserialize, Serialize, Clone, Default)]
@@ -37,13 +54,13 @@ fn default_true() -> bool {
     true
 }
 
-#[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]
+#[derive(Deserialize, Serialize, Default, zeroize::ZeroizeOnDrop)]
 pub struct NewRelicConfig {
     pub api_key: String,
     pub account_id: String,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct AnalyzerConfig {
     #[serde(default = "default_provider")]
     pub provider: String,
@@ -53,7 +70,7 @@ fn default_provider() -> String {
     "claude".to_string()
 }
 
-#[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]
+#[derive(Deserialize, Serialize, Default, zeroize::ZeroizeOnDrop)]
 pub struct ClaudeConfig {
     pub api_key: String,
     #[serde(default = "default_claude_model")]
@@ -64,7 +81,18 @@ fn default_claude_model() -> String {
     "claude-opus-4-6".to_string()
 }
 
-#[derive(Deserialize, Default, zeroize::ZeroizeOnDrop)]
+#[derive(Deserialize, Serialize, Default, zeroize::ZeroizeOnDrop)]
+pub struct DeepSeekConfig {
+    pub api_key: String,
+    #[serde(default = "default_deepseek_model")]
+    pub model: String,
+}
+
+fn default_deepseek_model() -> String {
+    "deepseek-chat".to_string()
+}
+
+#[derive(Deserialize, Serialize, Default, zeroize::ZeroizeOnDrop)]
 pub struct OpenAiConfig {
     pub api_key: String,
     #[serde(default = "default_openai_model")]
@@ -75,7 +103,7 @@ fn default_openai_model() -> String {
     "gpt-4o".to_string()
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct OutputConfig {
     #[serde(default = "default_format")]
     pub format: String,
@@ -97,7 +125,7 @@ fn default_language() -> String {
     "zh".to_string()
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct ServerConfig {
     #[allow(dead_code)]
     pub name: String,

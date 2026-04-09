@@ -36,3 +36,49 @@ export interface ReportDto {
   issues: IssueDto[];
   suggestions: SuggestionDto[];
 }
+
+export type AnalyzerId = 'local' | 'claude' | 'openai' | 'deepseek';
+
+export interface GeneratedReportDto {
+  analyzer: AnalyzerId;
+  report: ReportDto;
+}
+
+export interface AnalyzerFailureDto {
+  analyzer: AnalyzerId;
+  reason: string;
+}
+
+export interface GenerateReportsResultDto {
+  reports: GeneratedReportDto[];
+  failures: AnalyzerFailureDto[];
+  outputDir: string;
+}
+
+export interface ReportHistoryItemDto {
+  fileName: string;
+  path: string;
+  modifiedAt?: number;
+}
+
+export interface ReportHistoryContentDto {
+  fileName: string;
+  path: string;
+  content: string;
+}
+
+export interface AnalyzerOptionsDto {
+  analyzers: AnalyzerOptionDto[];
+}
+
+export interface PromptConfigDto {
+  zh: string;
+  en: string;
+}
+
+export interface AnalyzerOptionDto {
+  id: AnalyzerId;
+  enabled: boolean;
+  reason?: string;
+  selectedByDefault: boolean;
+}

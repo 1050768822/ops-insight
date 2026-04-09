@@ -5,6 +5,7 @@ account_id = "1234567"
 [analyzer]
 # 选择分析引擎:
 #   "claude" — Claude API（需要 api_key）
+#   "deepseek" — DeepSeek API（需要 api_key）
 #   "openai" — OpenAI API（需要 api_key）
 #   "local"  — 本地分析，无需 API Key（敏感数据检测、接口统计等）
 provider = "local"
@@ -12,6 +13,10 @@ provider = "local"
 [claude]
 api_key = "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 model = "claude-opus-4-6"
+
+[deepseek]
+api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+model = "deepseek-chat"
 
 [openai]
 api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -23,6 +28,18 @@ format = "both"
 output_dir = "./reports"
 # 报告语言: "zh"（中文，默认）| "en"（English）
 language = "zh"
+
+[prompt]
+# 在线分析器自定义 Prompt。留空时使用内置默认 Prompt。
+# 可用变量:
+#   {{period}}
+#   {{total_logs}}
+#   {{warning_count}}
+#   {{error_count}}
+#   {{fatal_count}}
+#   {{events}}
+zh = ""
+en = ""
 
 # 监控的服务器列表（留空则查询所有）
 [[servers]]

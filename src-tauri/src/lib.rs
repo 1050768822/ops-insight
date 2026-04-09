@@ -21,6 +21,10 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::report::get_analyzer_options,
+            commands::report::list_report_history,
+            commands::report::load_report_history,
+            commands::report::open_report_folder,
             commands::report::generate_daily_report,
             commands::report::generate_weekly_report,
             commands::report::generate_custom_report,
@@ -29,6 +33,8 @@ pub fn run() {
             commands::config::save_config_cmd,
             commands::config::init_config_cmd,
             commands::config::get_config_path,
+            commands::prompt::load_prompt_config,
+            commands::prompt::save_prompt_config,
             commands::desensitize::get_builtin_labels,
             commands::desensitize::get_desensitize_config,
             commands::desensitize::save_desensitize_config,

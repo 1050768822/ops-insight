@@ -17,15 +17,15 @@ pub use application::use_cases::generate_report::{
 
 // Config types
 pub use config::{
-    AnalyzerConfig, ClaudeConfig, Config, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
-    OutputConfig, PatternConfig, ServerConfig,
+    AnalyzerConfig, ClaudeConfig, Config, DeepSeekConfig, DesensitizeConfig, NewRelicConfig, OpenAiConfig,
+    OutputConfig, PatternConfig, PromptConfig, ServerConfig,
 };
 
 // Builtin pattern labels for desensitize UI
 pub use infrastructure::local::rules::sensitive::builtin_pattern_labels;
 
 // Factory functions
-pub use factory::{build_analyzer, load_config};
+pub use factory::{build_analyzer, build_analyzer_with_provider, load_config};
 
 // Range helpers
 pub use helpers::{init_config, parse_custom_range, serilog_range};
@@ -36,6 +36,7 @@ pub use domain::value_objects::SecretKey;
 
 // Infrastructure implementations
 pub use infrastructure::claude::ClaudeAnalyzer;
+pub use infrastructure::deepseek::DeepSeekAnalyzer;
 pub use infrastructure::local::LocalAnalyzer;
 pub use infrastructure::newrelic::NewRelicSource;
 pub use infrastructure::openai::OpenAiAnalyzer;

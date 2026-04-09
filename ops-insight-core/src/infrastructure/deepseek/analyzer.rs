@@ -7,7 +7,7 @@ use crate::domain::ports::{AnalysisInput, AnalysisOutput, Analyzer};
 use crate::domain::value_objects::SecretKey;
 use crate::infrastructure::shared::redaction::redact_for_display;
 
-pub struct OpenAiAnalyzer {
+pub struct DeepSeekAnalyzer {
     api_key: SecretKey,
     model: String,
     language: String,
@@ -15,7 +15,7 @@ pub struct OpenAiAnalyzer {
     client: reqwest::Client,
 }
 
-impl OpenAiAnalyzer {
+impl DeepSeekAnalyzer {
     pub fn new(api_key: SecretKey, model: String, language: String, prompt_config: PromptConfig) -> Self {
         Self {
             api_key,
@@ -28,30 +28,30 @@ impl OpenAiAnalyzer {
 }
 
 #[derive(Serialize)]
-struct OpenAiRequest {
+struct DeepSeekRequest {
     model: String,
-    messages: Vec<OpenAiMessage>,
+    messages: Vec<DeepSeekMessage>,
     max_tokens: u32,
 }
 
 #[derive(Serialize)]
-struct OpenAiMessage {
+struct DeepSeekMessage {
     role: String,
     content: String,
 }
 
 #[derive(Deserialize)]
-struct OpenAiResponse {
-    choices: Vec<OpenAiChoice>,
+struct DeepSeekResponse {
+    choices: Vec<DeepSeekChoice>,
 }
 
 #[derive(Deserialize)]
-struct OpenAiChoice {
-    message: OpenAiMessageContent,
+struct DeepSeekChoice {
+    message: DeepSeekMessageContent,
 }
 
 #[derive(Deserialize)]
-struct OpenAiMessageContent {
+struct DeepSeekMessageContent {
     content: String,
 }
 
@@ -79,7 +79,7 @@ struct RawSuggestion {
 }
 
 #[async_trait]
-impl Analyzer for OpenAiAnalyzer {
+impl Analyzer for DeepSeekAnalyzer {
     async fn analyze(&self, input: &AnalysisInput) -> anyhow::Result<AnalysisOutput> {
         let prompt = crate::infrastructure::shared::prompt::build_prompt(
             input,
@@ -87,9 +87,9 @@ impl Analyzer for OpenAiAnalyzer {
             &self.prompt_config,
         );
 
-        let request = OpenAiRequest {
+        let request = DeepSeekRequest {
             model: self.model.clone(),
-            messages: vec![OpenAiMessage {
+            messages: vec![DeepSeekMessage {
                 role: "user".to_string(),
                 content: prompt,
             }],
@@ -98,9 +98,9 @@ impl Analyzer for OpenAiAnalyzer {
 
         let http_resp = self
             .api_key
-            .use_key("openai_analyze_request", |key| {
+            .use_key("deepseek_analyze_request", |key| {
                 self.client
-                    .post("https://api.openai.com/v1/chat/completions")
+                    .post("https://api.deepseek.com/chat/completions")
                     .header("Authorization", format!("Bearer {key}"))
                     .header("Content-Type", "application/json")
                     .json(&request)
@@ -113,11 +113,11 @@ impl Analyzer for OpenAiAnalyzer {
         let safe_body = redact_for_display(&body, 300);
 
         if !status.is_success() {
-            anyhow::bail!("OpenAI API 错误 {status}，响应摘要: {safe_body}");
+            anyhow::bail!("DeepSeek API 错误 {status}，响应摘要: {safe_body}");
         }
 
-        let resp: OpenAiResponse = serde_json::from_str(&body)
-            .map_err(|e| anyhow::anyhow!("OpenAI 响应解析失败: {e}；响应摘要: {safe_body}"))?;
+        let resp: DeepSeekResponse = serde_json::from_str(&body)
+            .map_err(|e| anyhow::anyhow!("DeepSeek 响应解析失败: {e}；响应摘要: {safe_body}"))?;
 
         let text = resp
             .choices
@@ -129,7 +129,7 @@ impl Analyzer for OpenAiAnalyzer {
         let json_text = crate::infrastructure::shared::json::extract_json_payload(&text);
         let raw: RawAnalysis = serde_json::from_str(json_text).map_err(|e| {
             let safe_text = redact_for_display(&text, 300);
-            anyhow::anyhow!("OpenAI 返回格式解析失败: {e}；内容摘要: {safe_text}")
+            anyhow::anyhow!("DeepSeek 返回格式解析失败: {e}；内容摘要: {safe_text}")
         })?;
 
         let issues = raw
